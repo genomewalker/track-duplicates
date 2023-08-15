@@ -1,34 +1,34 @@
 
-# getDups: a tool to identify which taxa or function has read duplicates
+# trackDups: a tool to identify which taxa or function has read duplicates
 
 
-[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/genomewalker/get-duplicates?include_prereleases&label=version)](https://github.com/genomewalker/get-duplicates/releases) [![get-duplicates](https://github.com/genomewalker/get-duplicates/workflows/getDups_ci/badge.svg)](https://github.com/genomewalker/get-duplicates/actions) [![PyPI](https://img.shields.io/pypi/v/get-duplicates)](https://pypi.org/project/get-duplicates/) [![Conda](https://img.shields.io/conda/v/genomewalker/get-duplicates)](https://anaconda.org/genomewalker/get-duplicates)
+[![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/genomewalker/track-duplicates?include_prereleases&label=version)](https://github.com/genomewalker/track-duplicates/releases) [![track-duplicates](https://github.com/genomewalker/track-duplicates/workflows/trackDups_ci/badge.svg)](https://github.com/genomewalker/track-duplicates/actions) [![PyPI](https://img.shields.io/pypi/v/track-duplicates)](https://pypi.org/project/track-duplicates/) [![Conda](https://img.shields.io/conda/v/genomewalker/track-duplicates)](https://anaconda.org/genomewalker/track-duplicates)
 
 A simple tool to extract reads from specific taxonomic groups BAM files
 
 # Installation
 
-We recommend having [**conda**](https://docs.conda.io/en/latest/) installed to manage the virtual environments
+We recommend having [**conda**](https://docs.conda.io/en/latest/) or [**mamba**](https://github.com/mamba-org/mamba) installed to manage the virtual environments
 
 ### Using pip
 
 First, we create a conda virtual environment with:
 
 ```bash
-wget https://raw.githubusercontent.com/genomewalker/get-duplicates/master/environment.yml
+wget https://raw.githubusercontent.com/genomewalker/track-duplicates/master/environment.yml
 conda env create -f environment.yml
 ```
 
 Then we proceed to install using pip:
 
 ```bash
-pip install get-duplicates
+pip install track-duplicates
 ```
 
 ### Using mamba
 
 ```bash
-mamba install -c conda-forge -c bioconda -c genomewalker get-duplicates
+mamba install -c conda-forge -c bioconda -c genomewalker track-duplicates
 ```
 
 ### Install from source to use the development version
@@ -36,90 +36,66 @@ mamba install -c conda-forge -c bioconda -c genomewalker get-duplicates
 Using pip
 
 ```bash
-pip install git+ssh://git@github.com/genomewalker/get-duplicates.git
+pip install git+ssh://git@github.com/genomewalker/track-duplicates.git
 ```
 
 By cloning in a dedicated conda environment
 
 ```bash
-git clone git@github.com:genomewalker/get-duplicates.git
-cd get-duplicates
+git clone https://github.com/genomewalker/track-duplicates.git
+cd track-duplicates
 conda env create -f environment.yml
-conda activate get-duplicates
+conda activate track-duplicates
 pip install -e .
 ```
 
 
 # Usage
 
-getDups will take a BAM file and a taxonomy TSV file and extract the reads that map to each of the selected taxa. One can select a list of taxa and ranks to extract the reads from.
+trackDups will take a BAM/SAM/CRAM or a blast-m8 like file and a TSV file with read duplicates to track those duplicates over references.
 
 For a complete list of options:
 
 ```bash
-$ getDups --help
-usage: getDups [-h] -b BAM [-p PREFIX] [--only-read-ids] [--combine] [--unique] -T
-               TAXONOMY_FILE -r RANK [-M SORT_MEMORY] [-t THREADS] [--chunk-size CHUNK_SIZE]
-               [--debug] [--version]
+$ trackDups --help 
+usage: trackDups [-h] [-b FILE] [-B FILE] [-l FILE] -d FILE [-a FLOAT] [-m STR] [-t INT]
+                 [--blast-output FILE] [--bam-output FILE] [--lca-output FILE] [--debug]
+                 [--version]
 
-A simple tool to extract damaged reads from BAM files
+A simple tool to track duplicates on taxonomic and functional references.
 
 optional arguments:
   -h, --help            show this help message and exit
 
 required arguments:
-  -b BAM, --bam BAM     The BAM file used to generate the metaDMG results (default: None)
+  -b FILE, --bam FILE   A BAM file sorted by queryname (default: None)
+  -B FILE, --blast FILE
+                        A BLAST file in tabular format (default: None)
+  -l FILE, --lca FILE   A LCA file in tabular format produced by metaDMG (default: None)
 
 optional arguments:
-  -p PREFIX, --prefix PREFIX
-                        Prefix used for the output files (default: None)
-  --only-read-ids       Only output read IDs instead of the full read (default: False)
-  --combine             Combine reads from different taxonomic groups into one file (default:
-                        False)
-  --unique              Only output unique mapping reads in the case of reads mapping to
-                        multiple references (default: False)
-  -T TAXONOMY_FILE, --taxonomy-file TAXONOMY_FILE
-                        A file containing the taxonomy of the BAM references in the format
-                        d__;p__;c__;o__;f__;g__;s__. (default: None)
-  -r RANK, --rank RANK  Which taxonomic group and rank we want to get the reads extracted.
-                        (default: None)
-  -M SORT_MEMORY, --sort-memory SORT_MEMORY
+  -d FILE, --duplicates-file FILE
+                        A TSV file with the reads and number of duplicates. (default: None)
+  -a FLOAT, --min-read-ani FLOAT
+                        Minimum read ANI to keep a read (default: 90.0)
+  -m STR, --sort-memory STR
                         Set maximum memory per thread for sorting; suffix K/M/G recognized
                         (default: 1G)
-  -t THREADS, --threads THREADS
+  -t INT, --threads INT
                         Number of threads (default: 1)
-  --chunk-size CHUNK_SIZE
-                        Chunk size for parallel processing (default: None)
+  --blast-output FILE   Save a TSV file with the statistics for each reference (default:
+                        blast-output.tsv.gz)
+  --bam-output FILE     Save a TSV file with the statistics for each reference (default: bam-
+                        output.tsv.gz)
+  --lca-output FILE     Save a TSV file with the statistics for each taxa (default: lca-
+                        output.tsv.gz)
   --debug               Print debug messages (default: False)
   --version             Print program version
 ```
 
-One would run `getDups` as:
+One would run `trackDups` as:
 
 ```bash
-getDups --bam MED-2021-28-ver15-2LFQY-210811_S25.dedup.bam -T hires-organelles-viruses-smags.tax.tsv -r '{"domain":["d__Bacteria", "d__Archaea", "d__Viruses", "d__Eukaryota"]}' --threads 8 --unique
+trackDups -d mysample.counts.tsv.gz --bam mysample.bam --threads 8  -a 95
 ```
-> **Note**: The final number number of reads might not correspond to the number of reads in the BAM file. The reason is that if you are allowing multiple alignments for each read, the reads might be mapped to multiple references. In this case, the reads will be counted multiple times, for example, a read might map to a certain references, but also map to a reference that might be discarded. In this case, the read will be counted twice, once for the reference that is not discarded and once for the reference that is discarded. If you want to avoid this, you can use the `--unique` option, which will only count the read once.
-
-# Using taxonomies
-To be able to extract reads from specific taxa and/or ranks, one needs to provide a taxonomy file. This file should be a TSV file with the following format:
-
-```
-ACCESSION\td__Bacteria;l__Bacteria;k__Bacteria;p__Proteobacteria;c__Gammaproteobacteria;o__Enterobacterales;f__Enterobacteriaceae;g__Yersinia;s__Yersinia pestis
-```
-
-`ACCESSION` is the reference accession in the BAM file. The taxonomy is separated by `;` and the taxonomic groups are separated by `__`. The taxonomic groups recognized by `getDups` in `--taxonomy-file` and `--rank` are:
-  - **domain**: `d__`
-  - **lineage**: `l__`
-  - **kingdom**: `k__`
-  - **phylum**: `p__`
-  - **class**: `c__`
-  - **order**: `o__`
-  - **family**: `f__`
-  - **genus**: `g__`
-  - **species**: `s__`
-
-> **Note**: The taxonomic groups are case sensitive and one can include as many as desired. For example, if one wants to extract the reads from the genus *Yersinia* and the class *Bacilli*, one would use `--rank '{"genus": "Yersinia", "class":"Bacilli"}`.
-
-
-
+> **Note**: A read might be counted more than once if it is mapping to different locations in the same reference.
