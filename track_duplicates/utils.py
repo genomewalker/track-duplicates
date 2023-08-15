@@ -345,17 +345,6 @@ def get_arguments(argv=None):
     return args
 
 
-def concat_df(frames):
-    COLUMN_NAMES = frames[0].columns
-    df_dict = dict.fromkeys(COLUMN_NAMES, [])
-    for col in COLUMN_NAMES:
-        extracted = (frame[col] for frame in frames)
-        # Flatten and save to df_dict
-        df_dict[col] = fast_flatten(extracted)
-    df = pd.DataFrame.from_dict(df_dict)[COLUMN_NAMES]
-    return df
-
-
 @contextmanager
 def suppress_stdout():
     """A context manager that redirects stdout and stderr to devnull"""
