@@ -532,7 +532,7 @@ def process_bam(filename, dups, threads, sort_memory="8G", min_read_ani=90):
 
     # Check if BAM files is not sorted by coordinates, sort it by coordinates
     if not samfile.header["HD"]["SO"] == "queryname":
-        log.info("BAM file is not sorted by coordinates, sorting it...")
+        log.info("BAM file is not sorted by queryname, sorting it...")
         sorted_bam = bam.replace(".bam", ".td-sorted.bam")
         pysam.sort(
             "-n",
@@ -642,6 +642,6 @@ def process_lca(filename, dups):
 
                 pbar.update(len(chunk))
         decompressed_stream.close()
-        log.info(f"::: Found {i:,} alignments in BLAST file...")
+        log.info(f"::: Found {i:,} alignments in LCA file...")
 
         return results
